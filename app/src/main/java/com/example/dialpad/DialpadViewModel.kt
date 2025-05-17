@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -17,7 +16,7 @@ class DialpadViewModel : ViewModel() {
     //val phoneNumber: StateFlow<String> = _phoneNumber.asStateFlow()
     val phoneNumber: StateFlow<String> = _phoneNumber.map { digits ->
         formatPhoneNumber(digits)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    }.stateIn(viewModelScope, SharingStarted.Lazily, "")
 
 
     fun addDigit(digit: String) {
@@ -45,22 +44,13 @@ class DialpadViewModel : ViewModel() {
     }
 
     private fun formatPhoneNumber(number: String): String {
+        if (number.length <= 3) return number
 
-        return when {
-                number.length <= 3 -> number
-                else -> buildString {
-                    append("(${number.take(3)}) ")
+        val counterCode = "(${number.take(3)}) "
+        val remaining = number.drop(3)
 
-                    val remaining = number.drop(3)
-                    val chunked = remaining.chunked(3)
-
-                    chunked.forEachIndexed { index, chunk ->
-                        append(chunk)
-                        if (index != chunked.lastIndex) {
-                            append("-")
-                        }
-                    }
-                }.trim()
-            }
+        return counterCode + remaining.chunked(3).joinToString(
+            "-"
+        )
     }
 }
