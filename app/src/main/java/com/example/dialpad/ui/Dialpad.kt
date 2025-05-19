@@ -1,5 +1,7 @@
 package com.example.dialpad.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,14 +19,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.Contacts
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -152,8 +159,74 @@ fun Dialpad(
 
 }
 
+
 @Composable
 fun DialpadButton(
+    number: String,
+    letters: String,
+    onButtonClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val ripple = rememberRipple(
+        bounded = true,
+        radius = 45.dp,
+        color =Color(0xFF6200EE)
+        //MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f)
+    )
+
+    Surface(
+        shape = CircleShape,
+        //color = Color(0xFF6200EE),
+        color = Color.Transparent,
+        modifier = Modifier
+            .size(72.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple
+            ) { onButtonClick() },
+
+        ) {
+
+//    Button(
+//        onClick = onButtonClick,
+//        shape = CircleShape,
+//        colors = ButtonDefaults.buttonColors(
+//            containerColor = Color.Transparent,
+//        ),
+//        contentPadding = PaddingValues(
+//            horizontal = 16.dp,
+//            vertical = 4.dp
+//        ),
+//        modifier = modifier
+//
+//    ) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+        //   .background(Color.Gray)
+    ) {
+        Text(
+            text = number,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Black.copy(alpha = 0.8f),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = letters,
+            fontSize = 8.sp,
+            color = Color.Black.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+}
+
+
+@Composable
+fun DialpadButtonWithoutRipple(
     number: String,
     letters: String,
     onButtonClick: () -> Unit,
