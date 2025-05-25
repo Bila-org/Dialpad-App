@@ -20,6 +20,9 @@ class MainActivity : ComponentActivity() {
             DialpadTheme(darkTheme = false, dynamicColor = false) {
                 DialpadScreen(
                     phoneNumber = viewModel.phoneNumber.collectAsState().value,
+                    onTextFieldValueChange = {
+                        viewModel.updateTextFieldValue(it)
+                    },
                     onNumberClicked = { digit ->
                         viewModel.addDigit(digit)
                     },

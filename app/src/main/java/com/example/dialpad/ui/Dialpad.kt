@@ -1,17 +1,17 @@
 package com.example.dialpad.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -23,13 +23,12 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -88,19 +87,24 @@ fun Dialpad(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                IconButton(
-                    onClick = onContactsClicked,
+                Box(
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(radius = 30.dp),
+                            onClick = onContactsClicked
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Contacts,
                         contentDescription = "Contacts",
-                        modifier = Modifier.fillMaxSize(0.4f),
+                        modifier = Modifier.size(24.dp),
                         tint = Color.Black.copy(alpha = 0.6f)
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                //  Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Contacts",
                     fontSize = 10.sp,
@@ -113,24 +117,27 @@ fun Dialpad(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = onContinueClicked,
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF008400).copy(alpha = 0.6f),
-                        contentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(0.dp),
+                Box(
                     modifier = Modifier
-                        .padding(0.dp)
-                        .size(50.dp),
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF008400).copy(alpha = 0.6f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(
+                                bounded = true,
+                                radius = 30.dp,
+                                // color = Color.White
+                            ),
+                            onClick = onContinueClicked
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = "Continue",
-                        modifier = Modifier
-                            .size(50.dp)
-                            .wrapContentSize()
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.White
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -143,15 +150,22 @@ fun Dialpad(
         }
 
         item() {
-            IconButton(
-                onClick = onBackspaceClicked,
-                modifier = Modifier.size(50.dp)
+            Box(
+                modifier = Modifier
+                    .size(60.dp)  // Larger than the IconButton
+                    //   .padding(5.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(radius = 30.dp),
+                        onClick = onBackspaceClicked
+                    ),
+                contentAlignment = Center
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.Backspace,
                     contentDescription = "Contacts",
                     tint = Color.Black.copy(alpha = 0.6f),
-                    modifier = Modifier.fillMaxSize(0.4f)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -170,8 +184,8 @@ fun DialpadButton(
     val interactionSource = remember { MutableInteractionSource() }
     val ripple = rememberRipple(
         bounded = true,
-        radius = 45.dp,
-        color =Color(0xFF6200EE)
+        radius = 35.dp,
+        color = Color(0xFF6200EE)
         //MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f)
     )
 
@@ -187,41 +201,27 @@ fun DialpadButton(
             ) { onButtonClick() },
 
         ) {
-
-//    Button(
-//        onClick = onButtonClick,
-//        shape = CircleShape,
-//        colors = ButtonDefaults.buttonColors(
-//            containerColor = Color.Transparent,
-//        ),
-//        contentPadding = PaddingValues(
-//            horizontal = 16.dp,
-//            vertical = 4.dp
-//        ),
-//        modifier = modifier
-//
-//    ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-        //   .background(Color.Gray)
-    ) {
-        Text(
-            text = number,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Normal,
-            color = Color.Black.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = letters,
-            fontSize = 8.sp,
-            color = Color.Black.copy(alpha = 0.5f),
-            textAlign = TextAlign.Center,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+            //   .background(Color.Gray)
+        ) {
+            Text(
+                text = number,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Black.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = letters,
+                fontSize = 8.sp,
+                color = Color.Black.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center,
+            )
+        }
     }
-}
 }
 
 

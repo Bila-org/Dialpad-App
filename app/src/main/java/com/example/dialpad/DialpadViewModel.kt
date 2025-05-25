@@ -2,26 +2,24 @@ package com.example.dialpad
 
 import android.media.AudioManager
 import android.media.ToneGenerator
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class DialpadViewModel : ViewModel() {
 
-    private val _phoneNumber = MutableStateFlow<String>("")
+    private val _phoneNumber = MutableStateFlow(TextFieldValue(""))
 
-    //val phoneNumber: StateFlow<String> = _phoneNumber.asStateFlow()
-    val phoneNumber: StateFlow<String> = _phoneNumber.map { digits ->
-        formatPhoneNumber(digits)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, "")
+    val phoneNumber: StateFlow<TextFieldValue> = _phoneNumber.asStateFlow()
+
+
 
     private var toneGenerator: ToneGenerator? = ToneGenerator(AudioManager.STREAM_DTMF, 80)
+
     private val toneMap = mapOf(
         "0" to ToneGenerator.TONE_DTMF_0,
         "1" to ToneGenerator.TONE_DTMF_1,
@@ -37,35 +35,46 @@ class DialpadViewModel : ViewModel() {
         "#" to ToneGenerator.TONE_DTMF_P
     )
 
-    fun playTone(key: String){
+
+    fun addDigit(digit: String) {
         viewModelScope.launch {
-            toneGenerator?.startTone(toneMap[key]?: return@launch, 150)
+            toneGenerator?.startTone(toneMap[digit] ?: return@launch, 120)
+
+            val current = _phoneNumber.value
+            val newText = current.text.substring(0, current.selection.start) +
+                    digit +
+                    current.text.substring(current.selection.end)
+            _phoneNumber.value = current.copy(
+                text = newText,
+                selection = androidx.compose.ui.text.TextRange(current.selection.start + 1)
+            )
         }
     }
 
-    fun addDigit(digit: String) {
-        playTone(digit)
-        if (_phoneNumber.value.length < 15) {
-            _phoneNumber.update {
-                //val newNumber =
-                it + digit
-                //formatPhoneNumber(newNumber)
+
+    fun removeDigit() {
+        viewModelScope.launch {
+            val current = _phoneNumber.value
+            if (current.selection.start > 0) {
+                val newText = current.text.substring(0, current.selection.start - 1) +
+                        current.text.substring(current.selection.end)
+                _phoneNumber.value = current.copy(
+                    text = newText,
+                    selection = androidx.compose.ui.text.TextRange(current.selection.start - 1)
+                )
             }
         }
     }
 
-    fun removeDigit() {
-        _phoneNumber.update {
-            if (it.isNotEmpty()) {
-                //val newNumber =
-                it.dropLast(1)
-                //formatPhoneNumber(newNumber)
-            } else it
-        }
-    }
 
     fun clearNumber() {
-        _phoneNumber.update { "" }
+        //_phoneNumber.update { "" }
+        _phoneNumber.value = TextFieldValue("")
+    }
+
+
+    fun updateTextFieldValue(newValue: TextFieldValue) {
+        _phoneNumber.value = newValue
     }
 
     private fun formatPhoneNumber(number: String): String {
