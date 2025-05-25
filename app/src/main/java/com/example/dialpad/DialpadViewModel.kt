@@ -17,7 +17,6 @@ class DialpadViewModel : ViewModel() {
     val phoneNumber: StateFlow<TextFieldValue> = _phoneNumber.asStateFlow()
 
 
-
     private var toneGenerator: ToneGenerator? = ToneGenerator(AudioManager.STREAM_DTMF, 80)
 
     private val toneMap = mapOf(
