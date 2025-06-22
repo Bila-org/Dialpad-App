@@ -35,9 +35,22 @@ class DialpadViewModel : ViewModel() {
     )
 
 
+    fun startTone(digit: String) {
+        viewModelScope.launch {
+            toneGenerator?.startTone(toneMap[digit] ?: return@launch, -1)
+        }
+    }
+    
+
+    fun stopTOne() {
+        toneGenerator?.stopTone()
+
+    }
+
+
     fun addDigit(digit: String) {
         viewModelScope.launch {
-            toneGenerator?.startTone(toneMap[digit] ?: return@launch, 120)
+        //    toneGenerator?.startTone(toneMap[digit] ?: return@launch, 120)
 
             val current = _phoneNumber.value
             val newText = current.text.substring(0, current.selection.start) +
@@ -74,17 +87,6 @@ class DialpadViewModel : ViewModel() {
 
     fun updateTextFieldValue(newValue: TextFieldValue) {
         _phoneNumber.value = newValue
-    }
-
-    private fun formatPhoneNumber(number: String): String {
-        if (number.length <= 3) return number
-
-        val counterCode = "(${number.take(3)}) "
-        val remaining = number.drop(3)
-
-        return counterCode + remaining.chunked(3).joinToString(
-            "-"
-        )
     }
 
     // Release ToneGenerator resources when ViewModel is cleared

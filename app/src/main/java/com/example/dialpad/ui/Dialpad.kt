@@ -2,7 +2,10 @@ package com.example.dialpad.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,12 +62,16 @@ val dialPadItems = listOf(
 
 @Composable
 fun Dialpad(
-    onNumberClicked: (String) -> Unit,
+    onNumberPress: (String) -> Unit,
+    onNumberRelease: () -> Unit,
     onContactsClicked: () -> Unit,
-    onContinueClicked: () -> Unit,
+    onCallClicked: () -> Unit,
     onBackspaceClicked: () -> Unit,
+    onBackspaceLongClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val interactionSource = remember { MutableInteractionSource() }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -78,7 +86,8 @@ fun Dialpad(
             DialpadButton(
                 number = number,
                 letters = letters,
-                onButtonClick = { onNumberClicked(number) },
+                onPress = { onNumberPress(number) },
+                onRelease = { onNumberRelease() },
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -129,7 +138,7 @@ fun Dialpad(
                                 radius = 30.dp,
                                 // color = Color.White
                             ),
-                            onClick = onContinueClicked
+                            onClick = onCallClicked
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -149,21 +158,36 @@ fun Dialpad(
             }
         }
 
+
         item() {
             Box(
                 modifier = Modifier
                     .size(60.dp)  // Larger than the IconButton
                     //   .padding(5.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = rememberRipple(radius = 30.dp),
-                        onClick = onBackspaceClicked
-                    ),
+                    .indication(
+                        interactionSource = interactionSource,
+                        indication = rememberRipple(radius = 30.dp)
+                    )
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = { offset ->
+                                val press = PressInteraction.Press(offset)
+                                interactionSource.tryEmit(press)
+                                try {
+                                    awaitRelease()
+                                } finally {
+                                    interactionSource.tryEmit(PressInteraction.Release(press))
+                                }
+                            },
+                            onLongPress = { onBackspaceLongClicked() },
+                            onTap = { onBackspaceClicked() }
+                        )
+                    },
                 contentAlignment = Center
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.Backspace,
-                    contentDescription = "Contacts",
+                    contentDescription = "Backspace",
                     tint = Color.Black.copy(alpha = 0.6f),
                     modifier = Modifier.size(24.dp)
                 )
@@ -178,10 +202,12 @@ fun Dialpad(
 fun DialpadButton(
     number: String,
     letters: String,
-    onButtonClick: () -> Unit,
+    onPress: () -> Unit,
+    onRelease: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
     val ripple = rememberRipple(
         bounded = true,
         radius = 35.dp,
@@ -195,12 +221,26 @@ fun DialpadButton(
         color = Color.Transparent,
         modifier = Modifier
             .size(72.dp)
-            .clickable(
+            .indication(
                 interactionSource = interactionSource,
                 indication = ripple
-            ) { onButtonClick() },
-
-        ) {
+            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        interactionSource.tryEmit(press)
+                        onPress()
+                        try {
+                            awaitRelease()
+                        } finally {
+                            interactionSource.tryEmit(PressInteraction.Release(press))
+                            onRelease()
+                        }
+                    }
+                )
+            }
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -279,10 +319,12 @@ fun DialpadButtonWithoutRipple(
 fun DialpadPreview() {
     DialpadTheme() {
         Dialpad(
-            onNumberClicked = {},
+            onNumberPress = {},
+            onNumberRelease = {},
             onContactsClicked = {},
-            onContinueClicked = {},
+            onCallClicked = {},
             onBackspaceClicked = {},
+            onBackspaceLongClicked = {},
             modifier = Modifier.systemBarsPadding()
         )
     }
@@ -299,7 +341,8 @@ fun DialpadButtonPreview() {
         DialpadButton(
             number = "1",
             letters = "ABC",
-            onButtonClick = {}
+            onPress = {},
+            onRelease = {}
         )
     }
 }

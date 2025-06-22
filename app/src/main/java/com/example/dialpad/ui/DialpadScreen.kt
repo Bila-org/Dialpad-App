@@ -36,13 +36,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -64,14 +70,14 @@ import com.example.dialpad.ui.theme.DialpadTheme
 @Composable
 fun DialpadScreenPreview() {
     DialpadTheme {
-        DialpadScreen(
-            phoneNumber = TextFieldValue(""),
+        DialpadScreen(phoneNumber = TextFieldValue(""),
             onTextFieldValueChange = {},
-            onNumberClicked = {},
+            onNumberPress = {},
+            onNumberRelease = {},
             onContactsClicked = {},
-            onContinueClicked = {},
-            onBackspaceClicked = {}
-        )
+            onCallClicked = {},
+            onBackspaceClicked = {},
+            onBackspaceLongClicked = {})
     }
 }
 
@@ -80,16 +86,19 @@ fun DialpadScreenPreview() {
 fun DialpadScreen(
     phoneNumber: TextFieldValue,
     onTextFieldValueChange: (TextFieldValue) -> Unit,
-    onNumberClicked: (String) -> Unit,
+    onNumberPress: (String) -> Unit,
+    onNumberRelease: () -> Unit,
     onContactsClicked: () -> Unit,
-    onContinueClicked: () -> Unit,
+    onCallClicked: (TextFieldValue) -> Unit,
     onBackspaceClicked: () -> Unit,
+    onBackspaceLongClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    val keyboardController = LocalSoftwareKeyboardController.current
     val interactionSource = remember { MutableInteractionSource() }
     val layoutDirection = LocalLayoutDirection.current
+    val focusRequester = remember { FocusRequester() }
+
 
 
     Scaffold(
@@ -108,41 +117,29 @@ fun DialpadScreen(
                 title = {
                     Column() {
                         Text(
-                            text = "Audio Call",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold
+                            text = "Audio Call", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "Cellular Network",
-                            fontSize = 13.sp
+                            text = "Cellular Network", fontSize = 13.sp
                         )
                     }
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { }
-                    ) {
+                }, navigationIcon = {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Move Back"
                         )
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {}
-                    ) {
+                }, actions = {
+                    IconButton(onClick = {}) {
                         Icon(
-                            imageVector = Icons.Default.Tune,
-                            contentDescription = "Adjust Setting"
+                            imageVector = Icons.Default.Tune, contentDescription = "Adjust Setting"
                         )
                     }
-                }
-            )
+                })
         },
 
-        )
-    { innerPadding ->
+        ) { innerPadding ->
 
         Column(
             modifier = modifier
@@ -167,56 +164,61 @@ fun DialpadScreen(
                 ),
                 contentPadding = PaddingValues(8.dp),
                 border = BorderStroke(
-                    width = 1.dp,
-                    color = Color(0xFF03A9F4)
+                    width = 1.dp, color = Color(0xFF03A9F4)
                 ),
             ) {
                 Icon(
-                    imageVector = Icons.Default.SyncAlt,
-                    contentDescription = null
+                    imageVector = Icons.Default.SyncAlt, contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Tucson Test",
-                    fontSize = 12.sp
+                    text = "Tucson Test", fontSize = 12.sp
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            BasicTextField(
-                value = phoneNumber,
-                onValueChange = onTextFieldValueChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(interactionSource = interactionSource, indication = null) { },
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-//                readOnly = true,
-                singleLine = true,
-                visualTransformation = PhoneNumberVisualTransformation(),
-                interactionSource = interactionSource,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone,
-                    imeAction = ImeAction.None
-                ),
-                keyboardActions = KeyboardActions(
-                    onAny = { keyboardController?.hide() }
-                ),
-//                enabled = true,
-//                enabled = false, // Disable the IME input
-                textStyle = MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = 36.sp,
-                    textAlign = TextAlign.Center
+            CompositionLocalProvider(
+                LocalTextInputService provides null
+            ) {
+                BasicTextField(
+                    value = phoneNumber,
+                    onValueChange = onTextFieldValueChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    /*
+                        .focusRequester(focusRequester)
+                        // Todo: Check why the clickable and interaction source is needed here
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                       ) {
+                            focusRequester.requestFocus()   // Focus text field on tap
+                        },
+                        */
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    //readOnly = true,
+                    singleLine = true,
+                    visualTransformation = PhoneNumberVisualTransformation(),
+                    //visualTransformation = PhoneNumberTransformation(),
+//                    interactionSource = interactionSource,
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = 36.sp, textAlign = TextAlign.Center
+                    )
                 )
-            )
+            }
+
 
             Spacer(modifier = Modifier.weight(1f))
 
             Dialpad(
-                onNumberClicked = onNumberClicked,
+                onNumberPress = onNumberPress,
+                onNumberRelease = onNumberRelease,
                 onContactsClicked = onContactsClicked,
-                onContinueClicked = onContinueClicked,
+                onCallClicked = {
+                    onCallClicked(phoneNumber)
+                },
                 onBackspaceClicked = onBackspaceClicked,
+                onBackspaceLongClicked = onBackspaceLongClicked,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -225,7 +227,7 @@ fun DialpadScreen(
 }
 
 
-class PhoneNumberVisualTransformation : VisualTransformation {
+class USPhoneNumberVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val trimmed = text.text.filter { it.isDigit() }
 
@@ -234,15 +236,13 @@ class PhoneNumberVisualTransformation : VisualTransformation {
             trimmed.length <= 6 -> "(${trimmed.substring(0, 3)}) ${trimmed.substring(3)}"
             trimmed.length <= 10 -> "(${trimmed.substring(0, 3)}) ${
                 trimmed.substring(
-                    3,
-                    6
+                    3, 6
                 )
             }-${trimmed.substring(6)}"
 
             else -> "(${trimmed.substring(0, 3)}) ${trimmed.substring(3, 6)}-${
                 trimmed.substring(
-                    6,
-                    10
+                    6, 10
                 )
             }${trimmed.substring(10)}"
         }
@@ -250,8 +250,7 @@ class PhoneNumberVisualTransformation : VisualTransformation {
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val digitsOnly = text.text.filter { it.isDigit() }
-                    .take(offset).length
+                val digitsOnly = text.text.filter { it.isDigit() }.take(offset).length
                 return when {
                     digitsOnly <= 3 -> digitsOnly
                     digitsOnly <= 6 -> digitsOnly + 2
@@ -276,8 +275,7 @@ class PhoneNumberVisualTransformation : VisualTransformation {
         }
 
         return TransformedText(
-            text = AnnotatedString(formatted),
-            offsetMapping = offsetMapping
+            text = AnnotatedString(formatted), offsetMapping = offsetMapping
         )
     }
 }

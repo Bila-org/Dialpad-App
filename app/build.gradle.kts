@@ -57,7 +57,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    testImplementation ("junit:junit:4.13.2")
 
 
+    implementation ("com.googlecode.libphonenumber:libphonenumber:8.13.49")
     implementation ("androidx.compose.material:material-icons-extended-android:1.7.8")
 }
