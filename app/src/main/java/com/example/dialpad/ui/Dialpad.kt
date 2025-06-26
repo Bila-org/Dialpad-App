@@ -29,7 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
@@ -42,6 +46,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dialpad.ui.theme.DialpadTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 val dialPadItems = listOf(
@@ -88,6 +94,12 @@ fun Dialpad(
                 letters = letters,
                 onPress = { onNumberPress(number) },
                 onRelease = { onNumberRelease() },
+                onLongPress = {
+                    if (number == "0") {
+                        onBackspaceClicked()
+                        onNumberPress("+")
+                    } else null
+                },
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -204,6 +216,7 @@ fun DialpadButton(
     letters: String,
     onPress: () -> Unit,
     onRelease: () -> Unit,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -231,12 +244,16 @@ fun DialpadButton(
                         val press = PressInteraction.Press(offset)
                         interactionSource.tryEmit(press)
                         onPress()
+
                         try {
                             awaitRelease()
                         } finally {
                             interactionSource.tryEmit(PressInteraction.Release(press))
                             onRelease()
                         }
+                    },
+                    onLongPress = {
+                        onLongPress()
                     }
                 )
             }
@@ -342,7 +359,8 @@ fun DialpadButtonPreview() {
             number = "1",
             letters = "ABC",
             onPress = {},
-            onRelease = {}
+            onRelease = {},
+            onLongPress = {}
         )
     }
 }

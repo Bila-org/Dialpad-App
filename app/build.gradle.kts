@@ -57,8 +57,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    testImplementation ("junit:junit:4.13.2")
 
+    // Remove the below Unit test files
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.test:runner:1.6.2")
+    testImplementation("org.robolectric:robolectric:4.10")
+    testImplementation ("org.mockito:mockito-core:3.12.4")
 
     implementation ("com.googlecode.libphonenumber:libphonenumber:8.13.49")
     implementation ("androidx.compose.material:material-icons-extended-android:1.7.8")

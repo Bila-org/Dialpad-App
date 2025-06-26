@@ -22,37 +22,20 @@ import com.example.dialpad.ui.theme.DialpadTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: DialpadViewModel by viewModels()
+    private val viewModel: DialpadViewModel by viewModels { DialpadViewModel.Factory }
 
     // Permission launcher for CALL_PHONE
     private val callPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            makeCall(viewModel.phoneNumber.value.text)
+            makeCall(viewModel.dialpadState.value.phoneNumber.text)
         } else {
-            Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
+            //  coroutineScope.launch{
+            //    snackbarHostState.showSnackbar("Call permission denied")
+            // }
 
-
-    private val contactsPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            launchContactsPicker()
-        } else {
-            Toast.makeText(this, "Contacts permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val contactLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            result.data?.data?.let { contactUri ->
-                retrievePhoneNumber(contactUri)
-            }
+            //Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -64,54 +47,40 @@ class MainActivity : ComponentActivity() {
             }
             startActivity(intent)
         } catch (e: SecurityException) {
-            Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
+            // Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
+            //coroutineScope.launch{
+            //    snackbarHostState.showSnackbar("Call permission denied")
+            //}
+        }
+    }
+
+
+    private val contactsPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            launchContactsPicker()
+        } else {
+          //  Toast.makeText(this, "Contacts permission denied", Toast.LENGTH_SHORT).show()
+            //coroutineScope.launch{
+            //    snackbarHostState.showSnackbar("Contacts permission denied")
+            //}
+        }
+    }
+
+    private val contactLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.data?.let { contactUri ->
+                viewModel.retrievePhoneNumber(contactUri)
+            }
         }
     }
 
     private fun launchContactsPicker() {
         val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
         contactLauncher.launch(intent)
-    }
-
-
-    private fun retrievePhoneNumber(contactUri: Uri) {
-        try {
-            val cursor = this.contentResolver.query(
-                contactUri,
-                arrayOf(ContactsContract.Contacts._ID),
-                null,
-                null,
-                null
-            )
-            cursor?.use {
-                if (it.moveToFirst()) {
-                    val contactId = it.getColumnIndex(ContactsContract.Contacts._ID)
-                    if (contactId != -1) {
-                        val contactIdValue = it.getString(contactId)
-                        val phoneCursor = this.contentResolver.query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
-                            "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
-                            arrayOf(contactIdValue),
-                            null
-                        )
-                        phoneCursor?.use { phone ->
-                            if (phone.moveToFirst()) {
-                                val phoneNumberIndex =
-                                    phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                                if (phoneNumberIndex != -1) {
-                                    val phoneNumber =
-                                        TextFieldValue(phone.getString(phoneNumberIndex) ?: "")
-                                    viewModel.updateTextFieldValue(phoneNumber)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error retrieving phone number", Toast.LENGTH_SHORT).show()
-        }
     }
 
 
@@ -122,12 +91,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             DialpadTheme(darkTheme = false, dynamicColor = false) {
                 DialpadScreen(
-                    phoneNumber = viewModel.phoneNumber.collectAsState().value,
+                    state = viewModel.dialpadState.collectAsState().value,
                     onTextFieldValueChange = {
                         viewModel.updateTextFieldValue(it)
                     },
                     onNumberPress = { digit ->
-                        viewModel.startTone(digit)
                         viewModel.addDigit(digit)
                     },
                     onNumberRelease = {
@@ -160,6 +128,9 @@ class MainActivity : ComponentActivity() {
                     },
                     onBackspaceLongClicked = {
                         viewModel.clearNumber()
+                    },
+                    isContactListNumberSelected = { isContactListNumberSelected ->
+                        viewModel.dialOrContactPhoneNumber(isContactListNumberSelected)
                     }
                 )
             }
