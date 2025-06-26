@@ -39,7 +39,6 @@ class ContactsRepository(private val contentResolver: ContentResolver) {
                 }
             }
         } catch (e: Exception) {
-            //   Toast.makeText(this, "Error retrieving phone number", Toast.LENGTH_SHORT).show()
             return null
         }
         return null

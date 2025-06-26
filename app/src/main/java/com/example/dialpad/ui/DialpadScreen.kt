@@ -3,7 +3,6 @@ package com.example.dialpad.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -37,21 +36,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -185,7 +178,8 @@ fun DialpadScreen(
                 BasicTextField(
                     value = phoneNumber,
                     onValueChange = onTextFieldValueChange,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .testTag("PhoneNumberField"),
                     /*
                         .focusRequester(focusRequester)
@@ -255,60 +249,6 @@ fun DialpadScreen(
                 }
             },
             modifier = Modifier
-        )
-    }
-}
-
-
-class USPhoneNumberVisualTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = text.text.filter { it.isDigit() }
-
-        val formatted = when {
-            trimmed.length <= 3 -> trimmed
-            trimmed.length <= 6 -> "(${trimmed.substring(0, 3)}) ${trimmed.substring(3)}"
-            trimmed.length <= 10 -> "(${trimmed.substring(0, 3)}) ${
-                trimmed.substring(
-                    3, 6
-                )
-            }-${trimmed.substring(6)}"
-
-            else -> "(${trimmed.substring(0, 3)}) ${trimmed.substring(3, 6)}-${
-                trimmed.substring(
-                    6, 10
-                )
-            }${trimmed.substring(10)}"
-        }
-
-
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                val digitsOnly = text.text.filter { it.isDigit() }.take(offset).length
-                return when {
-                    digitsOnly <= 3 -> digitsOnly
-                    digitsOnly <= 6 -> digitsOnly + 2
-                    digitsOnly <= 10 -> digitsOnly + 4
-                    else -> digitsOnly + 4
-                }
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                val chars = formatted.take(offset)
-                var digitCount = 0
-                var i = 0
-                while (i < offset && i < chars.length) {
-                    if (chars[i].isDigit()) digitCount++
-                    i++
-                    if (i == offset - 1 && !formatted[i].isDigit()) {
-                        return digitCount
-                    }
-                }
-                return digitCount
-            }
-        }
-
-        return TransformedText(
-            text = AnnotatedString(formatted), offsetMapping = offsetMapping
         )
     }
 }

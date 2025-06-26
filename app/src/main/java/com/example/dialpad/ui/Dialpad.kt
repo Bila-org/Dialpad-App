@@ -23,17 +23,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.Contacts
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
@@ -46,8 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dialpad.ui.theme.DialpadTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 val dialPadItems = listOf(
@@ -257,52 +249,6 @@ fun DialpadButton(
                     }
                 )
             }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-            //   .background(Color.Gray)
-        ) {
-            Text(
-                text = number,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.Black.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = letters,
-                fontSize = 8.sp,
-                color = Color.Black.copy(alpha = 0.5f),
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-}
-
-
-@Composable
-fun DialpadButtonWithoutRipple(
-    number: String,
-    letters: String,
-    onButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onButtonClick,
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-        ),
-        contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 4.dp
-        ),
-        modifier = modifier
-        //  .padding(4.dp)
-        //   .size(55.dp)
-
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

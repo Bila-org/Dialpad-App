@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat
 import com.example.dialpad.ui.DialpadScreen
 import com.example.dialpad.ui.theme.DialpadTheme
@@ -61,7 +59,7 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             launchContactsPicker()
         } else {
-          //  Toast.makeText(this, "Contacts permission denied", Toast.LENGTH_SHORT).show()
+            //  Toast.makeText(this, "Contacts permission denied", Toast.LENGTH_SHORT).show()
             //coroutineScope.launch{
             //    snackbarHostState.showSnackbar("Contacts permission denied")
             //}
