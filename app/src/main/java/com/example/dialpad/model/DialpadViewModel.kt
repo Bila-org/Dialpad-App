@@ -1,4 +1,4 @@
-package com.example.dialpad
+package com.example.dialpad.model
 
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.dialpad.DialpadApplication
+import com.example.dialpad.data.ContactsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,14 +28,8 @@ data class DialpadState(
 
 class DialpadViewModel(private val contactsRepository: ContactsRepository) : ViewModel() {
 
-
     private val _dialpadState = MutableStateFlow<DialpadState>(DialpadState())
     val dialpadState: StateFlow<DialpadState> = _dialpadState.asStateFlow()
-
-
-//    private val _phoneNumber = MutableStateFlow(TextFieldValue(""))
-//    val phoneNumber: StateFlow<TextFieldValue> = _phoneNumber.asStateFlow()
-
 
     private var toneGenerator: ToneGenerator? = ToneGenerator(AudioManager.STREAM_DTMF, 80)
     private var phoneNumberFromContactList: TextFieldValue = TextFieldValue("")
@@ -110,7 +106,6 @@ class DialpadViewModel(private val contactsRepository: ContactsRepository) : Vie
         }
     }
 
-
     fun updateTextFieldValue(newValue: TextFieldValue) {
         _dialpadState.update {
             it.copy(
@@ -157,11 +152,15 @@ class DialpadViewModel(private val contactsRepository: ContactsRepository) : Vie
                 }
             }
         } else {
-            // Failed to retrieve phone number
+            _dialpadState.update {
+                it.copy(
+                    errorMessage = "Failed to retrieve the contact number"
+                )
+            }
         }
     }
 
-    // Release ToneGenerator resources when ViewModel is cleared
+    //     Release ToneGenerator resources when ViewModel is cleared
     override fun onCleared() {
         toneGenerator?.release()
         toneGenerator = null

@@ -1,4 +1,4 @@
-package com.example.dialpad.ui
+package com.example.dialpad.ui.util
 
 import android.telephony.PhoneNumberUtils
 import android.text.Selection

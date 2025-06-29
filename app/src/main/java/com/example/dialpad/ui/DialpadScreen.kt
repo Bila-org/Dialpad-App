@@ -2,7 +2,6 @@ package com.example.dialpad.ui
 
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -49,8 +48,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.dialpad.DialpadState
+import com.example.dialpad.model.DialpadState
 import com.example.dialpad.ui.theme.DialpadTheme
+import com.example.dialpad.ui.util.PhoneNumberVisualTransformation
 
 @Preview(
     showBackground = true,
@@ -73,7 +73,7 @@ fun DialpadScreenPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialpadScreen(
     state: DialpadState,
@@ -88,9 +88,7 @@ fun DialpadScreen(
     modifier: Modifier = Modifier
 ) {
 
-    //val interactionSource = remember { MutableInteractionSource() }
     val layoutDirection = LocalLayoutDirection.current
-    //val focusRequester = remember { FocusRequester() }
     val phoneNumber = state.phoneNumber
     val showContactSectionBox = state.showContactSelectionBox
 
@@ -102,12 +100,12 @@ fun DialpadScreen(
             left = WindowInsets.systemBars.asPaddingValues().calculateLeftPadding(layoutDirection),
             right = WindowInsets.systemBars.asPaddingValues().calculateRightPadding(layoutDirection)
         ),
-        // contentColor = MaterialTheme.colorScheme.background,
+//         contentColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                //colors = TopAppBarDefaults.topAppBarColors(
-                //  MaterialTheme.colorScheme.outline
-                //) ,
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                  MaterialTheme.colorScheme.outline
+//                ) ,
                 title = {
                     Column() {
                         Text(
@@ -142,7 +140,6 @@ fun DialpadScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HorizontalDivider(
-                // Adds a thin line below TopAppBar
                 modifier = Modifier.fillMaxWidth(),
                 thickness = 1.dp,
                 color = Color.LightGray.copy(alpha = 0.5f)
@@ -181,28 +178,14 @@ fun DialpadScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("PhoneNumberField"),
-                    /*
-                        .focusRequester(focusRequester)
-                        // Todo: Check why the clickable and interaction source is needed here
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                       ) {
-                            focusRequester.requestFocus()   // Focus text field on tap
-                        },
-                        */
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    //readOnly = true,
                     singleLine = true,
                     visualTransformation = PhoneNumberVisualTransformation(),
-                    //visualTransformation = PhoneNumberTransformation(),
-//                    interactionSource = interactionSource,
                     textStyle = MaterialTheme.typography.headlineMedium.copy(
                         fontSize = 36.sp, textAlign = TextAlign.Center
                     )
                 )
             }
-
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -228,7 +211,7 @@ fun DialpadScreen(
                 Text("Replace Phone Number ?")
             },
             text = {
-                Text("Do you want to replace the current phoneNumber with the selected one from contact list")
+                Text("Do you want to replace the current phoneNumber with the selected one from contact list?")
             },
             confirmButton = {
                 TextButton(

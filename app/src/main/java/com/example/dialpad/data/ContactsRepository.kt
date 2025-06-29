@@ -1,4 +1,4 @@
-package com.example.dialpad
+package com.example.dialpad.data
 
 import android.content.ContentResolver
 import android.net.Uri
@@ -31,7 +31,7 @@ class ContactsRepository(private val contentResolver: ContentResolver) {
                                     phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
                                 if (phoneNumberIndex != -1) {
                                     return phoneCursor.getString(phoneNumberIndex)
-                                    //TextFieldValue(phoneCursor.getString(phoneNumberIndex) ?: "")
+//                                    TextFieldValue(phoneCursor.getString(phoneNumberIndex) ?: "")
                                 }
                             }
                         }
@@ -39,6 +39,7 @@ class ContactsRepository(private val contentResolver: ContentResolver) {
                 }
             }
         } catch (e: Exception) {
+//               print(e.stackTrace)
             return null
         }
         return null

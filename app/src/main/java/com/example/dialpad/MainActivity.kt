@@ -15,6 +15,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
 import androidx.core.content.ContextCompat
+import com.example.dialpad.model.DialpadViewModel
 import com.example.dialpad.ui.DialpadScreen
 import com.example.dialpad.ui.theme.DialpadTheme
 
@@ -22,18 +23,14 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: DialpadViewModel by viewModels { DialpadViewModel.Factory }
 
-    // Permission launcher for CALL_PHONE
+
     private val callPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             makeCall(viewModel.dialpadState.value.phoneNumber.text)
         } else {
-            //  coroutineScope.launch{
-            //    snackbarHostState.showSnackbar("Call permission denied")
-            // }
-
-            //Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
+//             show snack bar for call permission denied
         }
     }
 
@@ -45,10 +42,8 @@ class MainActivity : ComponentActivity() {
             }
             startActivity(intent)
         } catch (e: SecurityException) {
-            // Toast.makeText(this, "Call permission denied", Toast.LENGTH_SHORT).show()
-            //coroutineScope.launch{
-            //    snackbarHostState.showSnackbar("Call permission denied")
-            //}
+            e.printStackTrace()
+//            show snack bar for call permission denied
         }
     }
 
@@ -59,10 +54,7 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             launchContactsPicker()
         } else {
-            //  Toast.makeText(this, "Contacts permission denied", Toast.LENGTH_SHORT).show()
-            //coroutineScope.launch{
-            //    snackbarHostState.showSnackbar("Contacts permission denied")
-            //}
+//            show snack bar for contacts permission denied
         }
     }
 
