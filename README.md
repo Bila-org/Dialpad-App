@@ -40,3 +40,7 @@ Please ensure your code follows the project's coding standards and includes appr
 
 Contact
 For questions or feedback, please contact the project maintainers.
+
+Screenshots
+<img width="657" height="485" alt="Dialpad_pic" src="https://github.com/user-attachments/assets/ddc1216b-8f4f-46e1-9789-1233714d6c05" />
+
