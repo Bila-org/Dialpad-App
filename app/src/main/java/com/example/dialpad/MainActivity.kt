@@ -15,14 +15,13 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
 import androidx.core.content.ContextCompat
-import com.example.dialpad.model.DialpadViewModel
-import com.example.dialpad.ui.DialpadScreen
+import com.example.dialpad.presentation.DialpadApp
+import com.example.dialpad.presentation.DialpadViewModel
 import com.example.dialpad.ui.theme.DialpadTheme
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: DialpadViewModel by viewModels { DialpadViewModel.Factory }
-
 
     private val callPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -63,7 +62,7 @@ class MainActivity : ComponentActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             result.data?.data?.let { contactUri ->
-                viewModel.retrievePhoneNumber(contactUri)
+                viewModel.getPhoneNumber(contactUri)
             }
         }
     }
@@ -80,7 +79,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DialpadTheme(darkTheme = false, dynamicColor = false) {
-                DialpadScreen(
+                DialpadApp(
                     state = viewModel.dialpadState.collectAsState().value,
                     onTextFieldValueChange = {
                         viewModel.updateTextFieldValue(it)
@@ -91,7 +90,7 @@ class MainActivity : ComponentActivity() {
                     onNumberRelease = {
                         viewModel.stopTOne()
                     },
-                    onContactsClicked = {
+                    onContactsClick = {
                         if (ContextCompat.checkSelfPermission(
                                 this,
                                 Manifest.permission.READ_CONTACTS
@@ -102,9 +101,9 @@ class MainActivity : ComponentActivity() {
                             contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
                         }
                     },
-                    onCallClicked = { phoneNumber ->
+                    onCallClick = { phoneNumber ->
                         if (ContextCompat.checkSelfPermission(
-                                this,
+                                this@MainActivity,
                                 Manifest.permission.CALL_PHONE
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
@@ -113,15 +112,16 @@ class MainActivity : ComponentActivity() {
                             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
                         }
                     },
-                    onBackspaceClicked = {
+                    onBackspaceClick = {
                         viewModel.removeDigit()
                     },
-                    onBackspaceLongClicked = {
+                    onBackspaceLongClick = {
                         viewModel.clearNumber()
                     },
                     isContactListNumberSelected = { isContactListNumberSelected ->
                         viewModel.dialOrContactPhoneNumber(isContactListNumberSelected)
-                    }
+                    },
+                    onBackClick = { finish()}
                 )
             }
         }

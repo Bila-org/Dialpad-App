@@ -1,4 +1,4 @@
-package com.example.dialpad.ui.util
+package com.example.dialpad.presentation.util
 
 import android.telephony.PhoneNumberUtils
 import android.text.Selection
@@ -25,7 +25,6 @@ class PhoneNumberVisualTransformation(
                 override fun originalToTransformed(offset: Int): Int {
                     return transformation.originalToTransformed[offset.coerceIn(transformation.originalToTransformed.indices)]
                 }
-
                 override fun transformedToOriginal(offset: Int): Int {
                     return transformation.transformedToOriginal[offset.coerceIn(transformation.transformedToOriginal.indices)]
                 }
